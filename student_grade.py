@@ -3,9 +3,9 @@ from openpyxl import load_workbook
 from students_grades.obj.student import Student
 from students_grades.obj.course import Course
 
-def get_students_grades(filename):
+def generate_students_obj(grades_filename):
     student_obj_list = []
-    wb = load_workbook(filename, read_only=True)
+    wb = load_workbook(grades_filename, read_only=True)
     ws = wb['FileFromYedion']
 
     for row in ws.rows:
@@ -26,9 +26,31 @@ def get_students_grades(filename):
     return student_obj_list
 
 
+def generate_exemption_dict(exemp_filename):
+    exemption_dict = {}
+    wb = load_workbook(exemp_filename, read_only=True)
+    ws = wb['Sheet1']
+
+    for row in ws.rows:
+        # Ignore the first line
+        if row[0].row == 1:
+            continue
+
+        id = row[0].value
+        assert type(id) is int
+
+        exemp = row[2].value
+        exemption_dict[id] = exemp
+
+    return exemption_dict
+
 
 if __name__ == '__main__':
-    student_obj_list = get_students_grades('/Users/uria/Desktop/Semester b/מבוא לשפת פייתון/תרגילים להגשה/final project/YedionXlsFile_01271_03791.XLSX')
+    course_name = 'עקרונות התכנות בפייתון'
+    course = Course(course_name, 5, 0.4)
 
-    for student in student_obj_list:
-        student.print_student()
+    course.student_obj_list = generate_students_obj('/Users/uria/Desktop/Semester b/מבוא לשפת פייתון/תרגילים להגשה/final project/YedionXlsFile_01271_03791.XLSX')
+
+    course.set_exemptions(generate_exemption_dict('/Users/uria/Desktop/Semester b/מבוא לשפת פייתון/תרגילים להגשה/final project/מחר פטורים.xlsx'))
+
+    course.print_details()
